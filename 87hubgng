@@ -1,0 +1,310 @@
+-- Services
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+-- Theme Color
+local PurpleTheme = Color3.fromRGB(170, 0, 255)
+local DarkPurple = Color3.fromRGB(80, 0, 120)
+local SnowColor = Color3.fromRGB(255, 255, 255)
+
+-- Main Setup
+local lp = Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "87Hub_SpamMatchUpdate"
+screenGui.Parent = lp:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 240, 0, 280) 
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -140)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true 
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = screenGui
+
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
+
+--- --- ---
+-- SNOW EFFECT
+--- --- ---
+local function createSnowflake()
+    local flake = Instance.new("Frame")
+    flake.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
+    flake.Position = UDim2.new(math.random(), 0, -0.1, 0)
+    flake.BackgroundColor3 = SnowColor
+    flake.BackgroundTransparency = math.random(0.1, 0.4)
+    flake.ZIndex = 2
+    flake.Parent = mainFrame
+    Instance.new("UICorner", flake).CornerRadius = UDim.new(1, 0)
+
+    task.spawn(function()
+        local speed = math.random(2, 5)
+        local wind = (math.random() - 0.5) * 0.1
+        local connection
+        connection = RunService.RenderStepped:Connect(function(dt)
+            if not flake.Parent then connection:Disconnect() return end
+            flake.Position = flake.Position + UDim2.new(wind * dt, 0, (speed * 0.1) * dt, 0)
+            if flake.Position.Y.Scale > 1.1 then flake:Destroy() connection:Disconnect() end
+        end)
+    end)
+end
+task.spawn(function() while task.wait(0.3) do createSnowflake() end end)
+
+--- --- ---
+-- TITLE & MINIMIZE
+--- --- ---
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 35)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "87 hub"
+titleLabel.TextColor3 = PurpleTheme
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 18
+titleLabel.Parent = mainFrame
+
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 25, 0, 25)
+minBtn.Position = UDim2.new(1, -30, 0, 5)
+minBtn.BackgroundColor3 = PurpleTheme
+minBtn.Text = "-"
+minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minBtn.Font = Enum.Font.GothamBold
+minBtn.Parent = mainFrame
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(1, 0)
+
+--- --- ---
+-- PAGE SYSTEM
+--- --- ---
+local function createPage()
+    local page = Instance.new("ScrollingFrame")
+    page.Size = UDim2.new(1, -20, 1, -100)
+    page.Position = UDim2.new(0, 10, 0, 90)
+    page.BackgroundTransparency = 1
+    page.ScrollBarThickness = 0
+    page.Visible = false
+    page.Parent = mainFrame
+    Instance.new("UIListLayout", page).Padding = UDim.new(0, 5)
+    page.UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    return page
+end
+
+local mainPage = createPage()
+local visualsPage = createPage()
+local utilityPage = createPage()
+mainPage.Visible = true
+
+local function createFeatureButton(parent, name, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.95, 0, 0, 35)
+    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = parent
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    local stroke = Instance.new("UIStroke", btn)
+    stroke.Color = DarkPurple
+    
+    local toggled = false
+    btn.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        btn.BackgroundColor3 = toggled and PurpleTheme or Color3.fromRGB(20, 20, 20)
+        callback(toggled)
+    end)
+end
+
+--- --- ---
+-- FEATURES
+--- --- ---
+
+createFeatureButton(mainPage, "Desync", function(state)
+    if state then
+        pcall(function() setfflag("NextGenReplicatorEnabledWrite4", "false") task.wait(0.05) setfflag("NextGenReplicatorEnabledWrite4", "true") end)
+        if lp.Character then lp.Character:Destroy() end
+        task.wait(0.5) lp:LoadCharacter()
+    end
+end)
+
+-- 87 SPAMMER (MATCHED THEME & TITLE)
+createFeatureButton(mainPage, "87 spammer", function(state)
+    if state then
+        task.spawn(function()
+            local v0 = getgenv and getgenv() or _G
+            if v0.__XD_SPAM_PANEL__ then return end
+            v0.__XD_SPAM_PANEL__ = true
+            
+            local l_Players_0 = game:GetService("Players")
+            local l_ReplicatedStorage_0 = game:GetService("ReplicatedStorage")
+            local l_LocalPlayer_0 = l_Players_0.LocalPlayer
+            local v8 = {"rocket", "balloon", "inverse", "tiny"}
+
+            -- FIND REMOTE
+            local v20 = (function(v13)
+                local v14 = os.clock()
+                local l_Packages_0 = l_ReplicatedStorage_0:FindFirstChild("Packages")
+                while os.clock() - v14 < v13 do
+                    if l_Packages_0 and l_Packages_0:FindFirstChild("Net") and l_Packages_0.Net:FindFirstChild("RE/AdminPanelService/ExecuteCommand") then
+                        return l_Packages_0.Net["RE/AdminPanelService/ExecuteCommand"]
+                    end
+                    task.wait(0.2)
+                    l_Packages_0 = l_ReplicatedStorage_0:FindFirstChild("Packages")
+                end
+            end)(5)
+
+            if v20 then
+                local l_ScreenGui_0 = Instance.new("ScreenGui", l_LocalPlayer_0.PlayerGui)
+                l_ScreenGui_0.Name = "87SpamGui"
+                
+                local l_Frame_0 = Instance.new("Frame", l_ScreenGui_0)
+                l_Frame_0.Size = UDim2.fromOffset(240, 300)
+                l_Frame_0.Position = UDim2.fromOffset(60, 120)
+                l_Frame_0.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                l_Frame_0.Active = true
+                l_Frame_0.Draggable = true -- Enable dragging
+                Instance.new("UICorner", l_Frame_0).CornerRadius = UDim.new(0, 10)
+                local mainStroke = Instance.new("UIStroke", l_Frame_0)
+                mainStroke.Color = DarkPurple
+
+                local l_Frame_1 = Instance.new("Frame", l_Frame_0)
+                l_Frame_1.Size = UDim2.new(1, 0, 0, 35)
+                l_Frame_1.BackgroundTransparency = 1
+                
+                local l_TextLabel_0 = Instance.new("TextLabel", l_Frame_1)
+                l_TextLabel_0.Size = UDim2.new(1, 0, 1, 0)
+                l_TextLabel_0.BackgroundTransparency = 1
+                l_TextLabel_0.Font = Enum.Font.GothamBold
+                l_TextLabel_0.TextColor3 = PurpleTheme
+                l_TextLabel_0.TextSize = 16
+                l_TextLabel_0.Text = "87 Spam" -- Updated Title
+
+                local l_TextButton_0 = Instance.new("TextButton", l_Frame_1)
+                l_TextButton_0.Text = "Refresh"
+                l_TextButton_0.Size = UDim2.fromOffset(60, 20)
+                l_TextButton_0.Position = UDim2.new(1, -65, 0, 7)
+                l_TextButton_0.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+                l_TextButton_0.TextColor3 = Color3.fromRGB(255, 255, 255)
+                l_TextButton_0.Font = Enum.Font.GothamBold
+                l_TextButton_0.TextSize = 10
+                Instance.new("UICorner", l_TextButton_0)
+
+                local l_ScrollingFrame_0 = Instance.new("ScrollingFrame", l_Frame_0)
+                l_ScrollingFrame_0.Size = UDim2.new(1, -20, 1, -50)
+                l_ScrollingFrame_0.Position = UDim2.fromOffset(10, 40)
+                l_ScrollingFrame_0.BackgroundTransparency = 1
+                l_ScrollingFrame_0.ScrollBarThickness = 0
+                local l_UIListLayout_0 = Instance.new("UIListLayout", l_ScrollingFrame_0)
+                l_UIListLayout_0.Padding = UDim.new(0, 5)
+
+                local function refresh()
+                    for _, v in pairs(l_ScrollingFrame_0:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+                    for _, p in pairs(l_Players_0:GetPlayers()) do
+                        if p ~= l_LocalPlayer_0 then
+                            local b = Instance.new("TextButton", l_ScrollingFrame_0)
+                            b.Size = UDim2.new(1, 0, 0, 30)
+                            b.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+                            b.TextColor3 = Color3.fromRGB(255, 255, 255)
+                            b.Font = Enum.Font.Gotham
+                            b.Text = " " .. p.Name
+                            b.TextXAlignment = Enum.TextXAlignment.Left
+                            Instance.new("UICorner", b)
+                            local s = Instance.new("UIStroke", b) s.Color = DarkPurple
+                            
+                            b.MouseButton1Click:Connect(function()
+                                for _, cmd in ipairs(v8) do pcall(function() v20:FireServer(p, cmd) end) end
+                            end)
+                        end
+                    end
+                end
+                l_TextButton_0.MouseButton1Click:Connect(refresh)
+                refresh()
+            end
+        end)
+    end
+end)
+
+createFeatureButton(visualsPage, "Optimize", function(state)
+    if state then
+        Lighting.GlobalShadows = false
+        for i, v in pairs(game:GetDescendants()) do if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end end
+    end
+end)
+
+local infJumpEnabled = false
+createFeatureButton(utilityPage, "Inf Jump", function(state) infJumpEnabled = state end)
+UserInputService.JumpRequest:Connect(function()
+    if infJumpEnabled and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+        lp.Character.HumanoidRootPart.Velocity = Vector3.new(lp.Character.HumanoidRootPart.Velocity.X, lp.Character.Humanoid.JumpPower, lp.Character.HumanoidRootPart.Velocity.Z)
+    end
+end)
+
+--- --- ---
+-- NAVIGATION TABS
+--- --- ---
+local topContainer = Instance.new("Frame")
+topContainer.Size = UDim2.new(1, 0, 0, 45)
+topContainer.Position = UDim2.new(0, 0, 0, 40)
+topContainer.BackgroundTransparency = 1
+topContainer.Parent = mainFrame
+local layout = Instance.new("UIListLayout", topContainer)
+layout.FillDirection = Enum.FillDirection.Horizontal
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.Padding = UDim.new(0, 6)
+
+local allButtons = {}
+local function setupTab(text, page)
+    local button = Instance.new("TextButton", topContainer)
+    button.Size = UDim2.new(0.31, -4, 0, 30) 
+    button.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 10 
+    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 4)
+    local s = Instance.new("UIStroke", button) s.Color = DarkPurple
+    table.insert(allButtons, button)
+
+    button.MouseButton1Click:Connect(function()
+        for _, btn in pairs(allButtons) do btn.BackgroundColor3 = Color3.fromRGB(15, 15, 15) btn.UIStroke.Color = DarkPurple end
+        mainPage.Visible = false visualsPage.Visible = false utilityPage.Visible = false
+        button.BackgroundColor3 = PurpleTheme
+        button.UIStroke.Color = PurpleTheme
+        page.Visible = true
+    end)
+end
+
+setupTab("Main", mainPage)
+setupTab("Visuals", visualsPage)
+setupTab("Utility", utilityPage)
+allButtons[1].BackgroundColor3 = PurpleTheme
+allButtons[1].UIStroke.Color = PurpleTheme
+
+--- --- ---
+-- MINIMIZE & DRAG
+--- --- ---
+local isMinimized = false
+minBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    mainFrame:TweenSize(UDim2.new(0, 240, 0, isMinimized and 40 or 280), "Out", "Quad", 0.3, true)
+    minBtn.Text = isMinimized and "+" or "-"
+    topContainer.Visible = not isMinimized
+end)
+
+local dragging, dragStart, startPos
+mainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = mainFrame.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+end)
